@@ -31,7 +31,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 CUSTOM_APPS = [
+    "common.apps.CommonConfig",
     "users.apps.UsersConfig",
+    "score.apps.ScoreConfig",
 ]
 
 SYSTEM_APPS = [
