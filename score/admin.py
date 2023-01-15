@@ -43,10 +43,14 @@ class RegularGameScoreAdmin(admin.ModelAdmin):
         "third",
         "fourth",
         "total_score",
+        "game_count",
         "average",
     )
 
 
 @admin.register(RegularGameDate)
 class RegularGameDateAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        "date",
+        "round_of_game",
+    )
