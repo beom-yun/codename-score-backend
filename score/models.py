@@ -24,6 +24,22 @@ class RegularGameScore(CommonModel):
             + (1 if self.fourth else 0)
         )
 
+    def max_score(self):
+        return max(
+            self.first if self.first else 0,
+            self.second if self.second else 0,
+            self.third if self.third else 0,
+            self.fourth if self.fourth else 0,
+        )
+
+    def min_score(self):
+        return min(
+            self.first if self.first else 1e9,
+            self.second if self.second else 1e9,
+            self.third if self.third else 1e9,
+            self.fourth if self.fourth else 1e9,
+        )
+
     def average(self):
         return self.total_score() / self.game_count()
 

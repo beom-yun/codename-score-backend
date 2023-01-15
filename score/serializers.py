@@ -20,6 +20,8 @@ class RegularGameSerializer(ModelSerializer):
     game_count = SerializerMethodField()
     average = SerializerMethodField()
     last_average = SerializerMethodField()
+    average_change = SerializerMethodField()
+    high_low = SerializerMethodField()
 
     class Meta:
         model = RegularGameScore
@@ -34,6 +36,8 @@ class RegularGameSerializer(ModelSerializer):
             "game_count",
             "average",
             "last_average",
+            "average_change",
+            "high_low",
         )
 
     def get_total_score(self, regular_game):
@@ -47,12 +51,21 @@ class RegularGameSerializer(ModelSerializer):
 
     def get_last_average(self, regular_game):
         try:
-            return (
+            last_average = (
                 regular_game.bowler.regulargamescore_set.filter(
                     date__lt=regular_game.date
                 )
                 .last()
                 .average()
             )
+            return round(last_average, 1)
         except:
             return 0
+
+    def get_average_change(self, regular_game):
+        return round(
+            self.get_average(regular_game) - self.get_last_average(regular_game), 1
+        )
+
+    def get_high_low(self, regular_game):
+        return regular_game.max_score() - regular_game.min_score()
