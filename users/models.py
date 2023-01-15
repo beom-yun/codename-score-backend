@@ -7,3 +7,6 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=150, editable=False)
     name = models.CharField(max_length=150, default="")
     phone_number = models.CharField(max_length=11, null=True)
+
+    # def __str__(self):
+    #     return self.name
