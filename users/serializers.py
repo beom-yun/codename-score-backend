@@ -5,7 +5,10 @@ from .models import User
 class BowlerSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ("name",)
+        fields = (
+            "pk",
+            "name",
+        )
 
 
 class UserSerializer(ModelSerializer):

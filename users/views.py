@@ -4,7 +4,18 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import ParseError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
-from .serializers import UserSerializer
+from .models import User
+from .serializers import BowlerSerializer, UserSerializer
+
+
+class Bowlers(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        bowlers = User.objects.all()
+        serializer = BowlerSerializer(bowlers, many=True)
+        return Response(serializer.data)
 
 
 class Me(APIView):
