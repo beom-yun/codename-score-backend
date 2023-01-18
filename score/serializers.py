@@ -7,6 +7,7 @@ class RegularGameDateSerializer(ModelSerializer):
     class Meta:
         model = RegularGameDate
         fields = (
+            "pk",
             "round_of_game",
             "date",
         )
