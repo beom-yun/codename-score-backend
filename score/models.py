@@ -13,32 +13,20 @@ class RegularGameScore(CommonModel):
     def __str__(self):
         return f"{self.date.round_of_game}회차 / {self.bowler.name}"
 
+    def score_list(self):
+        return [x for x in (self.first, self.second, self.third, self.fourth) if x]
+
     def total_score(self):
-        return self.first + self.second + self.third + self.fourth
+        return sum(self.score_list())
 
     def game_count(self):
-        return (
-            (1 if self.first else 0)
-            + (1 if self.second else 0)
-            + (1 if self.third else 0)
-            + (1 if self.fourth else 0)
-        )
+        return len(self.score_list())
 
     def max_score(self):
-        return max(
-            self.first if self.first else 0,
-            self.second if self.second else 0,
-            self.third if self.third else 0,
-            self.fourth if self.fourth else 0,
-        )
+        return max(self.score_list())
 
     def min_score(self):
-        return min(
-            self.first if self.first else 1e9,
-            self.second if self.second else 1e9,
-            self.third if self.third else 1e9,
-            self.fourth if self.fourth else 1e9,
-        )
+        return min(self.score_list())
 
     def average(self):
         return self.total_score() / self.game_count()
@@ -50,33 +38,3 @@ class RegularGameDate(CommonModel):
 
     def __str__(self):
         return str(self.date)
-
-
-# class SeedRecord(CommonModel):
-#     class SeedChoices(models.IntegerChoices):
-#         FIRST_SEED = 1
-#         SECOND_SEED = 2
-#         THIRD_SEED = 3
-#         FOURTH_SEED = 4
-#         FIFTH_SEED = 5
-#         SIXTH_SEED = 6
-
-#     month = models.DateField()
-#     bowler = models.ForeignKey("users.User", on_delete=models.CASCADE)
-#     seed = models.IntegerField(choices=SeedChoices.choices)
-
-#     def aver_of_month(self):
-#         month_score = RegularGameScore.objects.filter(
-#             bowler=self.bowler,
-#             date__date__year=self.month.year,
-#             date__date__month=self.month.month,
-#         )
-#         month_total_game_count = 0
-#         month_total_score = 0
-#         for score in month_score:
-#             month_total_game_count += score.game_count()
-#             month_total_score += score.total_score()
-#         return round(month_total_score / month_total_game_count, 2)
-
-#     def __str__(self):
-#         return f"{self.bowler} / {self.seed}"
