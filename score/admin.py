@@ -1,6 +1,6 @@
 import csv
 from django.contrib import admin
-from .models import RegularGameScore, RegularGameDate
+from .models import RegularGameScore, RegularGameDate, RegularGameSeed, MonthScore
 
 
 @admin.action(description="Download a csv file")
@@ -53,4 +53,23 @@ class RegularGameDateAdmin(admin.ModelAdmin):
     list_display = (
         "date",
         "round_of_game",
+    )
+
+
+@admin.register(MonthScore)
+class MonthScoreAdmin(admin.ModelAdmin):
+    list_display = (
+        "__str__",
+        "bowler",
+        "month",
+        "month_average",
+    )
+
+
+@admin.register(RegularGameSeed)
+class RegularGameSeedAdmin(admin.ModelAdmin):
+    list_display = (
+        "bowler",
+        "month",
+        "seed",
     )

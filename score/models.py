@@ -38,3 +38,18 @@ class RegularGameDate(CommonModel):
 
     def __str__(self):
         return str(self.date)
+
+
+class MonthScore(CommonModel):
+    bowler = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    month = models.DateField()
+    month_average = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.bowler} / {self.month} / {self.month_average}"
+
+
+class RegularGameSeed(CommonModel):
+    bowler = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    month = models.DateField()
+    seed = models.PositiveIntegerField()
