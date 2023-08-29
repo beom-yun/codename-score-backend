@@ -23,3 +23,11 @@ class RegularGameScoreAdmin(admin.ModelAdmin):
         "game_count",
         "average",
     )
+
+    list_filter = (
+        "date__round_of_game",
+        "bowler",
+    )
+
+
+# Seed

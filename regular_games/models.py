@@ -66,3 +66,7 @@ class RegularGameScore(models.Model):
         if not self.game_count():
             return 0
         return round(self.total_score() / self.game_count(), 2)
+
+
+# class RegularGameSeed(models.Model):
+#     pass
