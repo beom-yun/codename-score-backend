@@ -18,6 +18,7 @@ class CustomUserAdmin(UserAdmin):
                     "join_date",
                     "email",
                     "avatar",
+                    "phone_number",
                 )
             },
         ),

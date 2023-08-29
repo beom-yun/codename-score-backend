@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    """커스텀 유저 모델"""
+
     class GenderChoices(models.TextChoices):
         MALE = ("male", "남")
         FEMALE = ("female", "여")
@@ -15,7 +17,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=150, editable=False)
     last_name = models.CharField(max_length=150, editable=False)
     name = models.CharField(max_length=150, verbose_name="이름")
-    avatar = models.URLField(null=True, blank=True)
+    avatar = models.URLField(null=True, blank=True, verbose_name="아바타")
     gender = models.CharField(
         max_length=10, choices=GenderChoices.choices, verbose_name="성별"
     )
@@ -27,4 +29,9 @@ class User(AbstractUser):
         default=PositionChoices.GENERAL,
         verbose_name="직책",
     )
-    # phone_number
+    phone_number = models.CharField(
+        max_length=11, null=True, blank=True, verbose_name="전화번호"
+    )
+
+    def __str__(self):
+        return self.name
