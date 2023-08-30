@@ -27,5 +27,7 @@ class RegularGameScoreSerializer(ModelSerializer):
             "score3",
             "score4",
             "total_score",
+            "game_count",
             "average",
+            "high_low",
         )

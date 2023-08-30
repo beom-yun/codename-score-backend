@@ -1,3 +1,5 @@
+import datetime
+from dateutil.relativedelta import relativedelta
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
@@ -67,6 +69,26 @@ class RegularGameScore(models.Model):
             return 0
         return round(self.total_score() / self.game_count(), 2)
 
+    def high_low(self):
+        return max(self.scores()) - min(self.scores())
 
-# class RegularGameSeed(models.Model):
-#     pass
+    def __str__(self):
+        return f"{self.bowler} / {self.date} / {self.average()}"
+
+
+class RegularGameSeed(models.Model):
+    """정기전 시드 모델"""
+
+    class SeedChoices(models.TextChoices):
+        SEED_1 = ("1", "1시드")
+        SEED_2 = ("2", "2시드")
+        SEED_3 = ("3", "3시드")
+        SEED_4 = ("4", "4시드")
+        SEED_5 = ("5", "5시드")
+        SEED_6 = ("6", "6시드")
+
+    bowler = models.ForeignKey(
+        "users.User", on_delete=models.SET_NULL, null=True, verbose_name="볼러"
+    )
+    month = models.DateField()
+    seed = models.CharField(max_length=2, choices=SeedChoices.choices)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import RegularGameDate, RegularGameScore
+from .models import RegularGameDate, RegularGameScore, RegularGameSeed
 
 
 @admin.register(RegularGameDate)
@@ -30,4 +30,10 @@ class RegularGameScoreAdmin(admin.ModelAdmin):
     )
 
 
-# Seed
+@admin.register(RegularGameSeed)
+class RegularGameSeedAdmin(admin.ModelAdmin):
+    list_display = (
+        "bowler",
+        "month",
+        "seed",
+    )
