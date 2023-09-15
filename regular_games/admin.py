@@ -7,6 +7,7 @@ class RegularGameDateAdmin(admin.ModelAdmin):
     list_display = (
         "round_of_game",
         "date",
+        "num_of_bowlers",
     )
 
 

@@ -1,5 +1,3 @@
-import datetime
-from dateutil.relativedelta import relativedelta
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
@@ -9,6 +7,9 @@ class RegularGameDate(models.Model):
 
     round_of_game = models.PositiveIntegerField(verbose_name="회차")
     date = models.DateField(verbose_name="정기전 날짜")
+
+    def num_of_bowlers(self):
+        return self.regulargamescore_set.count()
 
     def __str__(self):
         return f"{self.date} ({self.round_of_game}회차)"
@@ -74,6 +75,9 @@ class RegularGameScore(models.Model):
 
     def __str__(self):
         return f"{self.bowler} / {self.date} / {self.average()}"
+
+    class Meta:
+        get_latest_by = "date__date"
 
 
 class RegularGameSeed(models.Model):
