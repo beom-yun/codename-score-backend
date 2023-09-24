@@ -137,26 +137,5 @@ class MyRecords(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # 나의 가입일
-        # 첫 정기전 참여일
-        # 근속년수
-        #
-        # 정기전 참여 횟수
-        # 총 게임 횟수
-        # 총 점수
-        # 총 평균
-        # 최고 점수, 최저 점수 + 언제?
-        # 최고 등수
-        # 1등 몇 번?
-        #
-        # 전체 점수 점수대별 막대 그래프
-        #
-        # 평균 변화 그래프
-        # 등수 변화 그래프
-        # 시드 변화 그래프
-
-        # all_regular_game_scores = RegularGameScore.objects.filter(bowler=request.user)
-        # print(all_regular_game_scores)
-        # serializer = MyRecordsSerializer(request.user, context={"request": request})
         serializer = MyRecordsSerializer(request.user)
         return Response(serializer.data)
