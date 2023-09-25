@@ -81,35 +81,9 @@ class RegularGameScoreSerializer(ModelSerializer):
 
 
 class TinyRegularGameScoreSerializer(ModelSerializer):
-    # bowler = PublicUserSerializer(read_only=True)
-    # prev_total_score = SerializerMethodField()
-    # prev_average = SerializerMethodField()
     rank = SerializerMethodField()
     date = RegularGameDateSerializer()
-
-    # def get_prev_total_score(self, regular_game_score):
-    #     try:
-    #         return (
-    #             regular_game_score.bowler.regulargamescore_set.filter(
-    #                 date__date__lt=regular_game_score.date.date
-    #             )
-    #             .latest()
-    #             .total_score()
-    #         )
-    #     except Exception:
-    #         return 0
-
-    # def get_prev_average(self, regular_game_score):
-    #     try:
-    #         return (
-    #             regular_game_score.bowler.regulargamescore_set.filter(
-    #                 date__date__lt=regular_game_score.date.date
-    #             )
-    #             .latest()
-    #             .average()
-    #         )
-    #     except Exception:
-    #         return 0
+    participant_count = SerializerMethodField()
 
     def get_rank(self, regular_game_score):
         rank = 1
@@ -122,6 +96,9 @@ class TinyRegularGameScoreSerializer(ModelSerializer):
                 rank += 1
         return rank
 
+    def get_participant_count(self, regular_game_score):
+        return regular_game_score.date.regulargamescore_set.count()
+
     class Meta:
         model = RegularGameScore
         fields = (
@@ -133,9 +110,8 @@ class TinyRegularGameScoreSerializer(ModelSerializer):
             "game_count",
             "average",
             "high_low",
-            # "prev_total_score",
-            # "prev_average",
             "rank",
+            "participant_count",
             "date",
         )
 
@@ -153,12 +129,13 @@ class MyRecordsSerializer(ModelSerializer):
     max_rank_count = SerializerMethodField()
     average_area = SerializerMethodField()
     regular_game_scores = SerializerMethodField()
+    participation_rate = SerializerMethodField()
 
     def get_first_regular_game_date(self, me):
         try:
             first_regular_game = RegularGameScore.objects.filter(bowler=me).earliest()
             return first_regular_game.date.date
-        except RegularGameScore.DoesNotExist:
+        except Exception:
             return ""
 
     def get_continuous_days(self, me):
@@ -170,21 +147,21 @@ class MyRecordsSerializer(ModelSerializer):
     def get_total_regular_game_count(self, me):
         try:
             return RegularGameScore.objects.filter(bowler=me).count()
-        except RegularGameScore.DoesNotExist:
+        except Exception:
             return 0
 
     def get_total_game_count(self, me):
         try:
             all_regular_games = RegularGameScore.objects.filter(bowler=me)
             return sum(regular_game.game_count() for regular_game in all_regular_games)
-        except RegularGameScore.DoesNotExist:
+        except Exception:
             return 0
 
     def get_total_total_score(self, me):
         try:
             all_regular_games = RegularGameScore.objects.filter(bowler=me)
             return sum(regular_game.total_score() for regular_game in all_regular_games)
-        except RegularGameScore.DoesNotExist:
+        except Exception:
             return 0
 
     def get_total_average(self, me):
@@ -200,7 +177,7 @@ class MyRecordsSerializer(ModelSerializer):
             for regular_game in all_regular_games:
                 result.append(max(regular_game.scores()))
             return max(result)
-        except RegularGameScore.DoesNotExist:
+        except Exception:
             return 0
 
     def get_min_score(self, me):
@@ -212,7 +189,7 @@ class MyRecordsSerializer(ModelSerializer):
                     if x:
                         scores.append(x)
             return min(scores)
-        except RegularGameScore.DoesNotExist:
+        except Exception:
             return 0
 
     def cal_rank(self, me):
@@ -228,7 +205,7 @@ class MyRecordsSerializer(ModelSerializer):
                         rank += 1
                 result.append(rank)
             return result
-        except RegularGameScore.DoesNotExist:
+        except Exception:
             return 0
 
     def get_max_rank(self, me):
@@ -254,15 +231,38 @@ class MyRecordsSerializer(ModelSerializer):
                 if regular_game.score4:
                     result[regular_game.score4 // 10] += 1
             return result
-        except RegularGameScore.DoesNotExist:
+        except Exception:
             return []
 
     def get_regular_game_scores(self, me):
         try:
             all_regular_games = RegularGameScore.objects.filter(bowler=me)
             return TinyRegularGameScoreSerializer(all_regular_games, many=True).data
-        except RegularGameScore.DoesNotExist:
+        except Exception:
             return []
+
+    def get_participation_rate(self, me):
+        try:
+            if me.join_date:
+                return round(
+                    (
+                        RegularGameScore.objects.filter(
+                            bowler=me, date__date__gte=me.join_date
+                        ).count()
+                        / RegularGameDate.objects.filter(date__gte=me.join_date).count()
+                    )
+                    * 100
+                )
+            else:
+                return round(
+                    (
+                        RegularGameScore.objects.filter(bowler=me).count()
+                        / RegularGameDate.objects.all().count()
+                    )
+                    * 100
+                )
+        except Exception:
+            return 0
 
     class Meta:
         model = User
@@ -283,6 +283,7 @@ class MyRecordsSerializer(ModelSerializer):
             "min_score",  # 최저 점수
             "max_rank",  # 최고 등수
             "max_rank_count",  # 최고 등수 몇 번?
+            "participation_rate",  # 참여율
             "average_area",  # 전체 점수 점수대별 막대 그래프
             "regular_game_scores",
             # 시드 변화 그래프
