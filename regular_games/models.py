@@ -71,7 +71,7 @@ class RegularGameScore(models.Model):
         return round(self.total_score() / self.game_count(), 2)
 
     def high_low(self):
-        return max(self.scores()) - min(self.scores())
+        return max(self.scores()) - min(x for x in self.scores() if x)
 
     def __str__(self):
         return f"{self.bowler} / {self.date} / {self.average()}"

@@ -80,6 +80,66 @@ class RegularGameScoreSerializer(ModelSerializer):
         )
 
 
+class TinyRegularGameScoreSerializer(ModelSerializer):
+    # bowler = PublicUserSerializer(read_only=True)
+    # prev_total_score = SerializerMethodField()
+    # prev_average = SerializerMethodField()
+    rank = SerializerMethodField()
+    date = RegularGameDateSerializer()
+
+    # def get_prev_total_score(self, regular_game_score):
+    #     try:
+    #         return (
+    #             regular_game_score.bowler.regulargamescore_set.filter(
+    #                 date__date__lt=regular_game_score.date.date
+    #             )
+    #             .latest()
+    #             .total_score()
+    #         )
+    #     except Exception:
+    #         return 0
+
+    # def get_prev_average(self, regular_game_score):
+    #     try:
+    #         return (
+    #             regular_game_score.bowler.regulargamescore_set.filter(
+    #                 date__date__lt=regular_game_score.date.date
+    #             )
+    #             .latest()
+    #             .average()
+    #         )
+    #     except Exception:
+    #         return 0
+
+    def get_rank(self, regular_game_score):
+        rank = 1
+        my_average = regular_game_score.average()
+        queryset = regular_game_score.date.regulargamescore_set.exclude(
+            bowler=regular_game_score.bowler
+        )
+        for query in queryset:
+            if query.average() > my_average:
+                rank += 1
+        return rank
+
+    class Meta:
+        model = RegularGameScore
+        fields = (
+            "score1",
+            "score2",
+            "score3",
+            "score4",
+            "total_score",
+            "game_count",
+            "average",
+            "high_low",
+            # "prev_total_score",
+            # "prev_average",
+            "rank",
+            "date",
+        )
+
+
 class MyRecordsSerializer(ModelSerializer):
     first_regular_game_date = SerializerMethodField()
     continuous_days = SerializerMethodField()
@@ -92,7 +152,7 @@ class MyRecordsSerializer(ModelSerializer):
     max_rank = SerializerMethodField()
     max_rank_count = SerializerMethodField()
     average_area = SerializerMethodField()
-    average_rank_change = SerializerMethodField()
+    regular_game_scores = SerializerMethodField()
 
     def get_first_regular_game_date(self, me):
         try:
@@ -227,31 +287,12 @@ class MyRecordsSerializer(ModelSerializer):
         except RegularGameScore.DoesNotExist:
             return {}
 
-    def get_average_rank_change(self, me):
+    def get_regular_game_scores(self, me):
         try:
             all_regular_games = RegularGameScore.objects.filter(bowler=me)
-            result = []
-            for regular_game in all_regular_games:
-                rank = 1
-                my_average = regular_game.average()
-                queryset = regular_game.date.regulargamescore_set.exclude(bowler=me)
-                for query in queryset:
-                    if query.average() > my_average:
-                        rank += 1
-                result.append(
-                    {
-                        "date": regular_game.date.date,
-                        "score": my_average,
-                        "rank": rank,
-                    }
-                )
-            return result
+            return TinyRegularGameScoreSerializer(all_regular_games, many=True).data
         except RegularGameScore.DoesNotExist:
-            return {}
-
-    # def get_rank_change(self, me):
-    #     rank = self.cal_rank(me)
-    #     return rank
+            return []
 
     class Meta:
         model = User
@@ -273,7 +314,6 @@ class MyRecordsSerializer(ModelSerializer):
             "max_rank",  # 최고 등수
             "max_rank_count",  # 최고 등수 몇 번?
             "average_area",  # 전체 점수 점수대별 막대 그래프
-            "average_rank_change",  # 평균 변화 그래프
-            # "rank_change",  # 등수 변화 그래프
+            "regular_game_scores",
             # 시드 변화 그래프
         )
