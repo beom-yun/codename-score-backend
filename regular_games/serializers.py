@@ -163,7 +163,7 @@ class MyRecordsSerializer(ModelSerializer):
 
     def get_continuous_days(self, me):
         first_regular_game_date = self.get_first_regular_game_date(me)
-        if not first_regular_game_date:
+        if not first_regular_game_date or not me.join_date:
             return ""
         return (first_regular_game_date - me.join_date).days
 
@@ -241,39 +241,9 @@ class MyRecordsSerializer(ModelSerializer):
     def get_average_area(self, me):
         try:
             all_regular_games = RegularGameScore.objects.filter(bowler=me)
-            result = {
-                0: 0,
-                1: 0,
-                2: 0,
-                3: 0,
-                4: 0,
-                5: 0,
-                6: 0,
-                7: 0,
-                8: 0,
-                9: 0,
-                10: 0,
-                11: 0,
-                12: 0,
-                13: 0,
-                14: 0,
-                15: 0,
-                16: 0,
-                17: 0,
-                18: 0,
-                19: 0,
-                20: 0,
-                21: 0,
-                22: 0,
-                23: 0,
-                24: 0,
-                25: 0,
-                26: 0,
-                27: 0,
-                28: 0,
-                29: 0,
-                30: 0,
-            }
+            if not all_regular_games:
+                return []
+            result = [0 for _ in range(31)]
             for regular_game in all_regular_games:
                 if regular_game.score1:
                     result[regular_game.score1 // 10] += 1
@@ -285,7 +255,7 @@ class MyRecordsSerializer(ModelSerializer):
                     result[regular_game.score4 // 10] += 1
             return result
         except RegularGameScore.DoesNotExist:
-            return {}
+            return []
 
     def get_regular_game_scores(self, me):
         try:
