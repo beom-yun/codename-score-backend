@@ -69,10 +69,35 @@ class RegularGameScores(APIView):
         except RegularGameDate.DoesNotExist:
             raise NotFound
 
+    def get_user(self, user_pk):
+        try:
+            return User.objects.get(pk=user_pk)
+        except User.DoesNotExist:
+            raise NotFound("유저 찾기 불가")
+
     def get(self, request, pk):
         regular_game_date = self.get_object(pk)
         scores = regular_game_date.regulargamescore_set.all()
         return Response(RegularGameScoreSerializer(scores, many=True).data)
+
+    def post(self, request, pk):
+        bowler = request.data.get("bowler")
+        if not bowler:
+            raise ParseError("bowler 항목은 필수입니다.")
+        bowler = self.get_user(bowler)
+        regular_game_date = self.get_object(pk)
+        if RegularGameScore.objects.filter(
+            date=regular_game_date, bowler=bowler
+        ).exists():
+            raise ParseError(f"해당 인원({bowler})의 해당 회차({regular_game_date}) 정보가 존재합니다.")
+        serializer = RegularGameScoreSerializer(data=request.data)
+        if serializer.is_valid():
+            new_regular_game_score = serializer.save(
+                date=regular_game_date, bowler=bowler
+            )
+            return Response(RegularGameScoreSerializer(new_regular_game_score).data)
+        else:
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 
 class RegularGameScoreDetail(APIView):
@@ -102,21 +127,21 @@ class RegularGameScoreDetail(APIView):
         score = self.get_object(date_pk, user_pk)
         return Response(RegularGameScoreSerializer(score).data)
 
-    def post(self, request, date_pk, user_pk):
-        regular_game_date = self.get_date(date_pk)
-        bowler = self.get_user(user_pk)
-        if RegularGameScore.objects.filter(
-            date=regular_game_date, bowler=bowler
-        ).exists():
-            raise ParseError(f"해당 인원({bowler})의 해당 회차({regular_game_date}) 정보가 존재합니다.")
-        serializer = RegularGameScoreSerializer(data=request.data)
-        if serializer.is_valid():
-            new_regular_game_score = serializer.save(
-                date=regular_game_date, bowler=bowler
-            )
-            return Response(RegularGameScoreSerializer(new_regular_game_score).data)
-        else:
-            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+    # def post(self, request, date_pk, user_pk):
+    #     regular_game_date = self.get_date(date_pk)
+    #     bowler = self.get_user(user_pk)
+    #     if RegularGameScore.objects.filter(
+    #         date=regular_game_date, bowler=bowler
+    #     ).exists():
+    #         raise ParseError(f"해당 인원({bowler})의 해당 회차({regular_game_date}) 정보가 존재합니다.")
+    #     serializer = RegularGameScoreSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         new_regular_game_score = serializer.save(
+    #             date=regular_game_date, bowler=bowler
+    #         )
+    #         return Response(RegularGameScoreSerializer(new_regular_game_score).data)
+    #     else:
+    #         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     def put(self, request, date_pk, user_pk):
         score = self.get_object(date_pk, user_pk)

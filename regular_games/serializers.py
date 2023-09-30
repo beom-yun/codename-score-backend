@@ -1,3 +1,4 @@
+import datetime
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from rest_framework.exceptions import ParseError
 from .models import RegularGameDate, RegularGameScore
@@ -139,10 +140,10 @@ class MyRecordsSerializer(ModelSerializer):
             return ""
 
     def get_continuous_days(self, me):
-        first_regular_game_date = self.get_first_regular_game_date(me)
-        if not first_regular_game_date or not me.join_date:
-            return ""
-        return (first_regular_game_date - me.join_date).days
+        print(datetime.datetime.today().date())
+        if not me.join_date:
+            return 0
+        return (datetime.datetime.today().date() - me.join_date).days
 
     def get_total_regular_game_count(self, me):
         try:
